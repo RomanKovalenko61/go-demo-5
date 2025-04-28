@@ -7,9 +7,9 @@ import (
 
 func TestGetMyLocation(t *testing.T) {
 	//Arrange - подготовка, expected результат, данные для функции
-	city := "Moskow"
+	city := "London"
 	expected := geo.GeoData{
-		City: "Moskow",
+		City: "London",
 	}
 	//Act - выполняет функцию
 	got, err := geo.GetMyLocation(city)
@@ -19,5 +19,13 @@ func TestGetMyLocation(t *testing.T) {
 	}
 	if got.City != expected.City {
 		t.Errorf("Ожидалось %v, получено %v", expected, got)
+	}
+}
+
+func TestGetMyLocationNoCityTest(t *testing.T) {
+	city := "Londonsdsdsdf"
+	_, err := geo.GetMyLocation(city)
+	if err != geo.ErrorNoCity {
+		t.Errorf("Ожидалось %v, получено %v", geo.ErrorNoCity, err)
 	}
 }

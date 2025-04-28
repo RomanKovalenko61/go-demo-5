@@ -1,6 +1,7 @@
 package geo
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"io"
@@ -11,8 +12,16 @@ type GeoData struct {
 	City string `json:"city"`
 }
 
+type CityPopulationResponce struct {
+	Error bool `json:"error"`
+}
+
 func GetMyLocation(city string) (*GeoData, error) {
 	if city != "" {
+		isCity := checkCity(city)
+		if !isCity {
+			panic("Такого города нет")
+		}
 		return &GeoData{
 			City: city,
 		}, nil
@@ -33,4 +42,22 @@ func GetMyLocation(city string) (*GeoData, error) {
 	var geo GeoData
 	json.Unmarshal(body, &geo)
 	return &geo, nil
+}
+
+func checkCity(city string) bool {
+	postBody, _ := json.Marshal(map[string]string{
+		"city": city,
+	})
+	resp, err := http.Post("https://countriesnow.space/api/v0.1/countries/population/cities", "application/json", bytes.NewBuffer(postBody))
+	if err != nil {
+		return false
+	}
+	body, err := io.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	if err != nil {
+		return false
+	}
+	var population CityPopulationResponce
+	json.Unmarshal(body, &population)
+	return !population.Error
 }
